@@ -3,6 +3,7 @@ import mss, cv2, time
 import PIL as ImageGrab
 import numpy as np
 
+pag.PAUSE = 0.04
 # nox
 # icon position
 left_icon_pos = {'left': 148, 'top': 717, 'width': 85, 'height': 85}
@@ -11,7 +12,6 @@ right_icon_pos = {'left': 357, 'top': 717, 'width': 85, 'height': 85}
 # button position
 left_button = [100, 900]
 right_button = [500, 900]
-
 
 def what_type_is_image(img):
     img_rgb = np.mean(img, axis=(0, 1))
@@ -34,6 +34,11 @@ def what_type_is_image(img):
             and img_rgb[2] > 115 and img_rgb[2] < 125:
         return "POISON"
 
+    elif img_rgb[0] > 220 and img_rgb[0] < 230 \
+            and img_rgb[1] > 220 and img_rgb[1] < 230 \
+            and img_rgb[2] > 145 and img_rgb[2] < 155:
+        return "BONUS"
+
     return None
 
 
@@ -46,36 +51,43 @@ def click(loc):
     pag.mouseDown()
     pag.mouseUp()
 
+if __name__ == "__main__":
+    bonus_check = False
 
-while True:
-    with mss.mss() as sct:
-        left_img = np.array(sct.grab(left_icon_pos))[:, :, :3]
-        right_img = np.array(sct.grab(right_icon_pos))[:, :, :3]
+    while True:
+        with mss.mss() as sct:
+            left_img = np.array(sct.grab(left_icon_pos))[:, :, :3]
+            right_img = np.array(sct.grab(right_icon_pos))[:, :, :3]
 
-        tmp_left_img = ImageGrab.grab(left_icon_pos)
-        #print(tmp_left_img)
-        # cv2.imshow('left.img', left_img)
-        # cv2.imshow('right_img', right_img)
-        # cv2.waitKey(0)
+            # tmp_left_img = ImageGrab.grab(left_icon_pos)
+            # print(tmp_left_img)
+            # cv2.imshow('left.img', left_img)
+            # cv2.imshow('right_img', right_img)
+            # cv2.waitKey(0)
 
-        left_icon = what_type_is_image(left_img)
-        right_icon = what_type_is_image(right_img)
+            left_icon = what_type_is_image(left_img)
+            right_icon = what_type_is_image(right_img)
 
-        # print(f'left_img = {left_icon} , right_img = {right_icon}')
+            # print(f'left_img = {left_icon} , right_img = {right_icon}')
 
-        #print("left_mean = {} , right_mead = {}".format(mean(left_img), mean(right_img)))
-        if left_icon is "SWARD":
-            click(left_button)
-            print(f"left = {left_icon}")
-        else:
-            print(f"left = {left_icon}")
+            print("left_mean = {} , right_mead = {}".format(mean(left_img), mean(right_img)))
+            if left_icon is "SWARD":
+                click(left_button)
+                print(f"left = {left_icon}, mean = {mean}")
+            else:
+                print(f"left = {left_icon}")
 
-        if right_icon is "SWARD":
-            click(left_button)
-            print(f"right = {right_icon}")
-        else:
-            print(f"right = {right_icon}")
+            if right_icon is "SWARD":
+                click(right_button)
+                print(f"right = {right_icon}, mean = {mean}")
+            else:
+                print(f"right = {right_icon}")
 
-while True:
-    x, y = pag.position()
-    print(f"x : {x} , y : {y}")
+
+            if left_icon is "BOUNS" or right_icon is "BONUS":
+                bouns_start_time = time.time()
+
+                while time.time() - bouns_start_time < 7 and bonus_check is False:
+                    pag.click(x=right_button[0], y = right_button[1], clicks = 4)
+
+
